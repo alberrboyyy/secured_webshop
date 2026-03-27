@@ -1,19 +1,14 @@
-const mysql = require('mysql2');
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
-const connection = mysql.createConnection({
-    host:     process.env.DB_HOST || 'localhost',
-    port:     process.env.DB_PORT || 3306,
-    user:     process.env.DB_USER || 'db_user',
-    password: process.env.DB_PASS || 'db_password',
-    database: process.env.DB_NAME || 'webshop'
+const dbPath = path.resolve(__dirname, "../../db.sqlite");
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("Erreur de connexion à SQLite :", err.message);
+  } else {
+    console.log("Connecté à la base de données SQLite locale.");
+  }
 });
 
-connection.connect((err) => {
-    if (err) {
-        console.error('Erreur de connexion à la base de données :', err);
-        throw err;
-    }
-    console.log(`Connecté à la BDD ${connection.config.database} sur ${connection.config.host} en tant que ${connection.config.user}`);
-});
-
-module.exports = connection;
+module.exports = db;
