@@ -31,7 +31,28 @@ module.exports = {
   // ----------------------------------------------------------
   // POST /api/auth/register
   // ----------------------------------------------------------
-  register: (_req, res) => {
-    res.status(501).json({ error: "Non implémenté — TODO exercice 7" });
+  register: (req, res) => {
+    const { username, email, password, address } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        error: "Les champs username, email et mot de passe sont requis",
+      });
+    }
+
+    const query = `INSERT INTO users (username, email, password, role, address) VALUES ('${username}', '${email}', '${password}', 'user', '${address || ""}')`;
+
+    db.run(query, function (err) {
+      if (err) {
+        if (err.message.includes("UNIQUE")) {
+          return res.status(409).json({ error: "Cet email est déjà utilisé" });
+        }
+        return res.status(500).json({ error: err.message, query: query });
+      }
+
+      res
+        .status(201)
+        .json({ message: "Inscription réussie", userId: this.lastID });
+    });
   },
 };

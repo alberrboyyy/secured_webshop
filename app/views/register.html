@@ -1,31 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Shop - Inscription</title>
-    <link rel="stylesheet" href="/css/main.css">
-</head>
-<body>
-    <div id="topbar"></div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Secure Shop - Inscription</title>
+        <link rel="stylesheet" href="/css/main.css" />
+    </head>
+    <body>
+        <div id="topbar"></div>
 
-    <main>
-        <section class="hero">
+        <main>
+            <section class="hero">
+                <div class="container">
+                    <h1>Inscription</h1>
+
+                    <div
+                        id="error-message"
+                        style="color: red; display: none; margin-bottom: 15px"
+                    ></div>
+                    <div
+                        id="success-message"
+                        style="color: green; display: none; margin-bottom: 15px"
+                    ></div>
+
+                    <form id="registerForm">
+                        <label for="username">Nom d'utilisateur :</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            required
+                        />
+
+                        <label for="email">Email :</label>
+                        <input type="email" id="email" name="email" required />
+
+                        <label for="password">Mot de passe :</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                        />
+
+                        <label for="address">Adresse (optionnel) :</label>
+                        <input type="text" id="address" name="address" />
+
+                        <button type="submit">S'inscrire</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer id="contact" class="footer">
             <div class="container">
-                <h1>Inscription</h1>
-
-                <p>Placer un formulaire d'inscription ici</p>
-
+                <p>Projet pedagogique - ETML 183</p>
             </div>
-        </section>
-    </main>
+        </footer>
 
-    <footer id="contact" class="footer">
-        <div class="container">
-            <p>Projet pedagogique - ETML 183</p>
-        </div>
-    </footer>
+        <script src="/js/nav.js"></script>
+        <script>
+            document
+                .getElementById("registerForm")
+                .addEventListener("submit", async (e) => {
+                    e.preventDefault();
 
-    <script src="/js/nav.js"></script>
-</body>
+                    const username = document.getElementById("username").value;
+                    const email = document.getElementById("email").value;
+                    const password = document.getElementById("password").value;
+                    const address = document.getElementById("address").value;
+
+                    const errorDiv = document.getElementById("error-message");
+                    const successDiv =
+                        document.getElementById("success-message");
+
+                    errorDiv.style.display = "none";
+                    successDiv.style.display = "none";
+
+                    try {
+                        const response = await fetch("/api/auth/register", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                username,
+                                email,
+                                password,
+                                address,
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            successDiv.textContent =
+                                "Inscription réussie ! Redirection vers la page de connexion...";
+                            successDiv.style.display = "block";
+                            setTimeout(() => {
+                                window.location.href = "/login";
+                            }, 2000);
+                        } else {
+                            errorDiv.textContent =
+                                data.error || "Erreur lors de l'inscription";
+                            errorDiv.style.display = "block";
+                        }
+                    } catch (error) {
+                        console.error("Erreur:", error);
+                        errorDiv.textContent =
+                            "Erreur de connexion au serveur.";
+                        errorDiv.style.display = "block";
+                    }
+                });
+        </script>
+    </body>
 </html>
