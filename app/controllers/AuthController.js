@@ -14,9 +14,9 @@ module.exports = {
       return res.status(400).json({ error: "Email et mot de passe requis" });
     }
 
-    const query = `SELECT * FROM users WHERE email = '${email}'`;
+    const query = `SELECT * FROM users WHERE email = ?`;
 
-    db.get(query, async (err, row) => {
+    db.get(query, [email], async (err, row) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -68,9 +68,10 @@ module.exports = {
         secret: pepper,
       });
 
-      const query = `INSERT INTO users (username, email, password, role, address) VALUES ('${username}', '${email}', '${hashedPassword}', 'user', '${address || ""}')`;
+      const query = `INSERT INTO users (username, email, password, role, address) VALUES (?, ?, ?, 'user', ?)`;
+      const params = [username, email, hashedPassword, address || ""];
 
-      db.run(query, function (err) {
+      db.run(query, params, function (err) {
         if (err) {
           if (err.message.includes("UNIQUE")) {
             return res
