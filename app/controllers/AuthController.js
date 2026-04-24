@@ -1,6 +1,8 @@
 const db = require("../config/db");
 const argon2 = require("argon2");
 
+const pepper = Buffer.from(process.env.PEPPER);
+
 module.exports = {
   // ----------------------------------------------------------
   // POST /api/auth/login
@@ -26,7 +28,9 @@ module.exports = {
       }
 
       try {
-        const match = await argon2.verify(row.password, password);
+        const match = await argon2.verify(row.password, password, {
+          secret: pepper,
+        });
 
         if (!match) {
           return res
@@ -61,6 +65,7 @@ module.exports = {
         memoryCost: 2 ** 16, // 64 Mo
         timeCost: 3,
         parallelism: 1,
+        secret: pepper,
       });
 
       const query = `INSERT INTO users (username, email, password, role, address) VALUES ('${username}', '${email}', '${hashedPassword}', 'user', '${address || ""}')`;
