@@ -1,7 +1,8 @@
 const db = require("../config/db");
 const argon2 = require("argon2");
+const jwt = require("jsonwebtoken");
 
-const pepper = Buffer.from(process.env.PEPPER);
+const pepper = Buffer.from(process.env.PEPPER_SECRET);
 
 module.exports = {
   // ----------------------------------------------------------
@@ -40,9 +41,19 @@ module.exports = {
 
         delete row.password;
 
-        res.json({ message: "Connexion réussie", user: row });
+        const token = jwt.sign(
+          { id: row.id, role: row.role },
+          process.env.JWT_SECRET,
+          { expiresIn: "2h" },
+        );
+
+        res.json({
+          message: "Connexion réussie",
+          token: token,
+          user: { id: row.id, username: row.username, role: row.role },
+        });
       } catch (err) {
-        return res.status(500).json({ error: "Erreur interne du serveur" });
+        return res.status(500).json({ error: err.message });
       }
     });
   },
